@@ -10,3 +10,5 @@ Route::post('/ingredient/{name}', [IngredientController::class, 'store']);
 
 // Recipes
 Route::post('/recipe/{name}', [RecipeController::class, 'store']);
+Route::get('/recipe/{name}', [RecipeController::class, 'show']);
+Route::delete('/recipe/{name}', [RecipeController::class, 'destroy']);

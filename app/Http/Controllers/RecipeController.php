@@ -35,4 +35,26 @@ class RecipeController extends Controller{
 
         ], 200);
     }
+
+    public function show(string $name, RecipeService $recipeService)
+    {
+        $recipeData = $recipeService->getRecipeWithNutrition($name);
+
+        if (!$recipeData) {
+            return response()->json(['error' => 'Recipe not found.'], 404);
+        }
+
+        return response()->json($recipeData);
+    }
+
+    public function destroy(string $name, RecipeService $recipeService)
+    {
+        $deleted = $recipeService->deleteByName($name);
+
+        if (!$deleted) {
+            return response()->json(['error' => 'Recipe not found.'], 404);
+        }
+
+        return response()->json(['message' => 'Recipe deleted successfully.']);
+    }
 }

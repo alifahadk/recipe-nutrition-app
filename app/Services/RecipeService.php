@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTOs\IngredientDTO;
 use App\Models\Recipe;
 use App\Models\RecipeIngredient;
 
@@ -72,5 +73,55 @@ class RecipeService
             'recipe' => $recipe,
             'created' => $wasNew,
         ];
+    }
+
+    public function getRecipeWithNutrition(string $name): ?array
+    {
+        $recipe = Recipe::with('ingredients')->where('name', $name)->first();
+
+        if (!$recipe) {
+            return null;
+        }
+
+        $ingredientNames = [];
+        $carbs = 0;
+        $fat = 0;
+        $protein = 0;
+
+        foreach ($recipe->ingredients as $ingredient) {
+            $ingredientNames[] = $ingredient->ingredient_name;
+
+            $external = $this->ingredientService->fetchByName($ingredient->ingredient_name);
+
+            if ($external instanceof IngredientDTO) {
+                $carbs += $external->carbs;
+                $fat += $external->fat;
+                $protein += $external->protein;
+            }
+        }
+
+        return [
+            'name' => $recipe->name,
+            'description' => $recipe->description,
+            'ingredients' => $ingredientNames,
+            'nutritional_value' => [
+                'carbs' => $carbs,
+                'protein' => $protein,
+                'fat' => $fat,
+            ]
+        ];
+    }
+
+    public function deleteByName(string $name): bool
+    {
+        $recipe = Recipe::where('name', $name)->first();
+
+        if (!$recipe) {
+            return false;
+        }
+
+        $recipe->delete();
+
+        return true;
     }
 }
